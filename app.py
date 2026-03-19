@@ -6,30 +6,7 @@ import glob
 from dotenv import load_dotenv
 from docx import Document
 from huggingface_hub import InferenceClient
-from prompts import SYSTEM_PROMPT, WELCOME_MESSAGE, RETRY_PROMPT
-
-MAX_RETRIES = 2
-REQUIRED_DIMENSIONS = [
-    "Dimension 1",
-    "Dimension 2",
-    "Dimension 3",
-    "Dimension 4",
-    "Dimension 5",
-    "Dimension 6",
-]
-
-
-def validate_template(response_text):
-    """Check that the response contains all 6 dimensions with Risk and Opportunity sections."""
-    for dim in REQUIRED_DIMENSIONS:
-        if dim not in response_text:
-            return False
-    if len(re.findall(r"\*\*Risk \(ABACUS\)\:\*\*", response_text)) < 6:
-        return False
-    if len(re.findall(r"\*\*Opportunity \(ROBOTS\)\:\*\*", response_text)) < 6:
-        return False
-    return True
-
+from prompts import SYSTEM_PROMPT, WELCOME_MESSAGE
 
 def load_docs(folder="docs"):
     """Load all .docx files from the docs/ folder and return their text."""
@@ -110,56 +87,26 @@ if prompt:
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Generate AI Response with template validation and retry
+    # Generate AI Response (no validation/retry logic)
     with st.chat_message("assistant"):
         if not hf_token:
             st.error("HF_TOKEN not found! Please add it to your Codespace Secrets.")
         else:
             try:
-                response = None
                 output_placeholder = st.empty()
-
-                for attempt in range(MAX_RETRIES + 1):
-                    messages_to_send = list(st.session_state.messages)
-
-                    # On retry, append a correction prompt
-                    if attempt > 0 and response is not None:
-                        messages_to_send.append({"role": "assistant", "content": response})
-                        messages_to_send.append({"role": "user", "content": RETRY_PROMPT})
-
-                    # Call the model with streaming
-                    stream = client.chat_completion(
-                        messages=messages_to_send,
-                        max_tokens=4000,
-                        temperature=0.7,
-                        stream=True
-                    )
-
-                    # Stream tokens into the placeholder
-                    response = ""
-                    for token in stream:
-                        if len(token.choices) > 0 and token.choices[0].delta.content is not None:
-                            response += token.choices[0].delta.content
-                            output_placeholder.markdown(response + "▌")
-
-                    output_placeholder.markdown(response)
-
-                    # Validate the template
-                    if validate_template(response) or attempt == MAX_RETRIES:
-                        break
-
-                    # Clear output, show retry message for 3 seconds, then retry
-                    output_placeholder.empty()
-                    
-                    output_placeholder.warning(f"⚠️ The model didn't follow the required template. Retrying ({attempt + 1}/{MAX_RETRIES})...")
-                    time.sleep(3)
-                    output_placeholder.empty()
-
-                # Show the final response
+                messages_to_send = list(st.session_state.messages)
+                stream = client.chat_completion(
+                    messages=messages_to_send,
+                    max_tokens=4000,
+                    temperature=0.3,
+                    stream=True
+                )
+                response = ""
+                for token in stream:
+                    if len(token.choices) > 0 and token.choices[0].delta.content is not None:
+                        response += token.choices[0].delta.content
+                        output_placeholder.markdown(response + "▌")
                 output_placeholder.markdown(response)
-
-                # Save the final response to history
                 st.session_state.messages.append({"role": "assistant", "content": response})
-
             except Exception as e:
                 st.error(f"Error: {str(e)}")

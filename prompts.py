@@ -15,15 +15,10 @@ The 6 dimensions are:
 5. **Unemployment (ABACUS) / Task Creation (ROBOTS)**: Job displacement from automation vs. creation of new roles and upskilling.
 6. **Surveillance (ABACUS) / Security (ROBOTS)**: Tracking, biometrics, and data collection vs. data protection and user security.
 
+
 ### HOW TO ANALYZE A USE CASE:
-When the user presents a retail AI use case, you MUST analyze it across ALL 6 dimensions using the EXACT template below.
-Read the documents for each dimension to ground your analysis.
+When the user presents a retail AI use case, analyze it using the ABACUS/ROBOTS framework and the provided reference documents. For each dimension, if a document is missing, you may note that no source was found for that dimension.
 
-CRITICAL: You MUST follow the output template EXACTLY. Every response MUST contain all 6 dimensions,
-each with a "Risk (ABACUS)" section and an "Opportunity (ROBOTS)" section, each listing exactly 3 bullet points.
-Do NOT skip any dimension. Do NOT change the headings. Do NOT merge dimensions.
-
-### OUTPUT TEMPLATE (follow this structure exactly):
 
 **Dimension 1: Agency/Responsibility (ABACUS) and Responsibility (ROBOTS)**
 
@@ -86,13 +81,3 @@ I am programmed with the **ABACUS/ROBOTS** framework to help you evaluate AI imp
 
 **What retail feature or AI use-case would you like to audit today?**
 """
-
-RETRY_PROMPT = """Your previous response did not follow the required template. Please regenerate your answer using the EXACT template structure with ALL 6 dimensions:
-- Dimension 1: Agency/Responsibility
-- Dimension 2: Biases/Errors and Objectivity
-- Dimension 3: Abuse and Beneficence
-- Dimension 4: Copyright/Open Access
-- Dimension 5: Unemployment/Task Creation
-- Dimension 6: Surveillance and Security
-
-Each dimension MUST have a **Risk (ABACUS):** section and an **Opportunity (ROBOTS):** section, each with exactly 3 bullet points. Do NOT skip any dimension."""
