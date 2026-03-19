@@ -37,24 +37,27 @@ if prompt := st.chat_input("Ask about a retail AI case (e.g., facial recognition
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Generate AI Response
+    # Generate AI Response (streaming)
     with st.chat_message("assistant"):
         if not hf_token:
             st.error("HF_TOKEN not found! Please add it to your Codespace Secrets.")
         else:
             try:
-                # We call the model
-                response = client.chat_completion(
+                # We call the model with streaming enabled
+                stream = client.chat_completion(
                     messages=st.session_state.messages,
                     max_tokens=800,
-                    temperature=0.7 # Makes the AI a bit more creative/conversational
+                    temperature=0.7,
+                    stream=True
                 )
                 
-                output_text = response.choices[0].message.content
-                st.markdown(output_text)
+                response = st.write_stream(
+                    token.choices[0].delta.content or ""
+                    for token in stream
+                )
                 
                 # Save the response to history
-                st.session_state.messages.append({"role": "assistant", "content": output_text})
+                st.session_state.messages.append({"role": "assistant", "content": response})
             
             except Exception as e:
                 st.error(f"Error: {str(e)}")
