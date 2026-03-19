@@ -51,12 +51,10 @@ if prompt := st.chat_input("Ask about a retail AI case (e.g., facial recognition
                     stream=True
                 )
                 
-                def generate():
-                    for token in stream:
-                        if token.choices and token.choices[0].delta.content:
-                            yield token.choices[0].delta.content
-
-                response = st.write_stream(generate())
+                response = st.write_stream(
+                    token.choices[0].delta.content or ""
+                    for token in stream if len(token.choices) > 0 and token.choices[0].delta.content is not None
+                )
                 
                 # Save the response to history
                 st.session_state.messages.append({"role": "assistant", "content": response})
