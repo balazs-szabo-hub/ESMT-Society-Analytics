@@ -48,8 +48,7 @@ load_dotenv()
 hf_token = os.getenv("HF_TOKEN")
 
 # 3. Initialize the AI Client
-# Using Llama-3.1-8B: 128K context window, free on the Inference API
-client = InferenceClient("meta-llama/Llama-3.1-8B-Instruct", token=hf_token)
+client = InferenceClient("Qwen/Qwen2.5-7B-Instruct", token=hf_token)
 
 # 4. Load reference documents & Initialize Chat History
 docs_context = load_docs()
