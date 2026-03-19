@@ -52,8 +52,7 @@ if prompt := st.chat_input("Ask about a retail AI case (e.g., facial recognition
                 )
                 
                 response = st.write_stream(
-                    token.choices[0].delta.content or ""
-                    for token in stream if len(token.choices) > 0 and token.choices[0].delta.content is not None
+                    token.choices[0].delta.content for token in stream if len(token.choices) > 0 and token.choices[0].delta.content is not None
                 )
                 
                 # Save the response to history
