@@ -19,9 +19,9 @@ def load_docs(folder="docs"):
     return "\n\n".join(texts)
 
 # 1. Page Configuration
-st.set_page_config(page_title="Retail Ethics Demo", page_icon="🛍️")
+st.set_page_config(page_title="Retail Ethics Demo", page_icon="🛍️", layout="wide")
 
-# Sidebar with example use cases
+# Sidebar (Left Panel) - Use Cases & Document Downloads
 EXAMPLE_CASES = [
     "Audit facial recognition technology used in retail stores",
     "Evaluate dynamic pricing algorithms in e-commerce",
@@ -37,13 +37,43 @@ with st.sidebar:
         if st.button(case, use_container_width=True):
             st.session_state.selected_case = case
             st.rerun()
+            
+    st.markdown("---")
+    
+    # Responsive Document Downloads inside the Sidebar
+    st.header("📚 Framework Docs")
+    st.caption("Download the ABACUS/ROBOTS dimensions used for this audit.")
+    
+    doc_files = sorted(glob.glob(os.path.join("docs", "*.docx")))
+    
+    if doc_files:
+        # Loop through and create a button for each document. 
+        # Streamlit will automatically stack these and fit them to the sidebar width.
+        for i, filepath in enumerate(doc_files):
+            filename = os.path.basename(filepath)
+            
+            try:
+                with open(filepath, "rb") as f:
+                    file_bytes = f.read()
+                
+                # Removed the heavy truncation so the full document name can be read easily
+                display_name = filename.replace(".docx", "")
 
-st.title("🛒 Retail AI Ethics Auditor")
-st.markdown("---")
+                st.download_button(
+                    label=f"📄 {display_name}",
+                    data=file_bytes,
+                    file_name=filename,
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    help=f"Download {filename}",
+                    use_container_width=True,
+                    key=f"doc_dl_{i}" # Unique key for each button
+                )
+            except Exception as e:
+                st.error(f"Error loading {filename}")
+    else:
+        st.info("No documents found in the '/docs' folder.")
 
 # 2. Secure Token Handling
-# In Codespaces, you'll set this in your Secrets.
-# For local testing, you can paste it here (but don't push it to GitHub!)
 load_dotenv()
 hf_token = os.getenv("HF_TOKEN")
 
@@ -66,9 +96,13 @@ if "messages" not in st.session_state:
         {"role": "assistant", "content": WELCOME_MESSAGE}
     ]
 
+# --- MAIN CHAT INTERFACE ---
+st.title("🛒 Retail AI Ethics Auditor")
+st.markdown("---")
+
 # 5. Display Chat History
 for message in st.session_state.messages:
-    if message["role"] != "system": # Don't show the background instructions
+    if message["role"] != "system":
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
@@ -86,10 +120,10 @@ if prompt:
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Generate AI Response (no validation/retry logic)
+    # Generate AI Response
     with st.chat_message("assistant"):
         if not hf_token:
-            st.error("HF_TOKEN not found! Please add it to your Codespace Secrets.")
+            st.error("HF_TOKEN not found! Please add it to your environment variables.")
         else:
             try:
                 output_placeholder = st.empty()
